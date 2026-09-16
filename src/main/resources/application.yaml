@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: employee-svc
+
+server:
+  port: 8081
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      departmentService:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+  retry:
+    instances:
+      retryDepartmentService:
+        max-attempts: 3
+        wait-duration: 500ms
+  bulkhead:
+    instances:
+      bulkheadDepartmentService:
+        max-concurrent-calls: 20
+        max-wait-duration: 0
+  ratelimiter:
+    instances:
+      ratelimiterDepartmentService:
+        limit-for-period: 10
+        limit-refresh-period: 1s
+        timeout-duration: 0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
