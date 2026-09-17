@@ -30,13 +30,13 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials',
                 usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_TOKEN')]){
-                    sh echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin
+                    'sh echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin'
                 }
             }
         }
         stage('Docker push'){
             steps {
-                sh docker push ${IMAGE_NAME}:${BUILD_NUMBER}
+                sh 'docker push ${IMAGE_NAME}:${BUILD_NUMBER}'
             }
         }
     }
