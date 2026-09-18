@@ -31,3 +31,23 @@ build/
 
 ### VS Code ###
 .vscode/
+# General macOS clutter
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon files (e.g. customized folder icons)
+Icon\r
+
+# Thumbnails and system indexing data
+._*
+.Spotlight-V100
+.Trashes
+
+# Files created by desktop applications
+.DocumentRevisions-V100
+.fseventsd
+.VolumeIcon.icns
+
+# Temporary or cache files
+$RECYCLE.BIN/
