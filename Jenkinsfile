@@ -46,5 +46,16 @@ pipeline {
                sh 'kubectl get nodes'
             }
         }
+
+        stage('Deploy to k8s') {
+            steps {
+                sh '''
+                    kubectl set image deployment/employee-svc \
+                        employee-svc=${IMAGE_NAME}:${BUILD_NUMBER}
+
+                    kubectl rollout status deployment/employee-svc
+                '''
+            }
+        }
     }
 }
