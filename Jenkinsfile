@@ -39,5 +39,12 @@ pipeline {
                 sh 'docker push ${IMAGE_NAME}:${BUILD_NUMBER}'
             }
         }
+
+        stage('Kubernetes Check') {
+            steps {
+               sh 'kubectl version --client'
+               sh 'kubectl get nodes'
+            }
+        }
     }
 }
