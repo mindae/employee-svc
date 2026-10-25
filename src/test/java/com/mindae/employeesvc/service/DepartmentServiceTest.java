@@ -33,6 +33,15 @@ class DepartmentServiceTest {
         assertEquals(expectedDepartmentResponse, actualDepartmentResponse);
 
     }
+
+    @Test
+    void fallbacksKeepTheirExistingResponses() {
+        assertEquals(new DepartmentResponse(0L, "circuitbreaker: dept temp unavail"),
+                departmentService.departmentFallback(new RuntimeException("department unavailable")));
+        assertEquals(new DepartmentResponse(0L, "retry: dept temp unavail"),
+                departmentService.retryFallbackDepartmentService(
+                        new RuntimeException("department unavailable")));
+    }
 //
 //    @Test
 //    void shouldThrowExceptionWhenDepartmentFails() {

@@ -1,0 +1,8 @@
+management:
+  server:
+    address: 127.0.0.1
+    port: 8086
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,circuitbreakerevents,retryevents
