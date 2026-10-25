@@ -1,3 +1,9 @@
+spring:
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data-local.sql
+
 management:
   server:
     address: 127.0.0.1

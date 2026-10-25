@@ -9,6 +9,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: never
   h2:
     console:
       enabled: true

@@ -5,11 +5,13 @@ import com.mindae.employeesvc.eda.event.EmployeeCreatedEvent;
 import com.mindae.employeesvc.eda.event.OutboxEvent;
 import com.mindae.employeesvc.eda.repo.EmployeeRepository;
 import com.mindae.employeesvc.eda.repo.OutboxEventRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -65,5 +67,9 @@ public class EmployeeService {
                 );
 
         outBoxRepo.save(oEvent);
+    }
+
+    public List<Employee> getAllEmployees() {
+        return empRepo.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 }

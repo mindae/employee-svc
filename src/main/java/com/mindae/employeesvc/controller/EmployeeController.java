@@ -1,5 +1,6 @@
 package com.mindae.employeesvc.controller;
 
+import com.mindae.employeesvc.eda.entity.Employee;
 import com.mindae.employeesvc.response.EmployeeResponse;
 import com.mindae.employeesvc.service.DepartmentService;
 import com.mindae.employeesvc.service.EmployeeEventProducer;
@@ -7,6 +8,8 @@ import com.mindae.employeesvc.service.EmployeeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequestMapping("/api/v1/employees")
 @RestController
@@ -32,6 +35,11 @@ public class EmployeeController {
                 "mindae",
                 departmentService.getDepartment()
         );
+    }
+
+    @GetMapping("/all")
+    public List<Employee> getAllEmployees() {
+        return es.getAllEmployees();
     }
 
     @PostMapping("/{employeeId}/event")
