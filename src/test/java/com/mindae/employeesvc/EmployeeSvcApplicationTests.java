@@ -18,7 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -67,6 +70,61 @@ class EmployeeSvcApplicationTests {
                 .andExpect(jsonPath("$[0].department").value("Finance"))
                 .andExpect(jsonPath("$[1].department").value("Engineering"))
                 .andExpect(jsonPath("$[2].department").value("Human Resources"));
+    }
+
+    @Test
+    void shouldCreateEmployeeAndRejectDuplicateId() throws Exception {
+        mockMvc.perform(post("/api/v1/employees")
+                        .contentType("application/json")
+                        .content("""
+                                {"id":"new-employee","name":"New Employee","department":"Engineering"}
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value("new-employee"))
+                .andExpect(jsonPath("$.name").value("New Employee"))
+                .andExpect(jsonPath("$.department").value("Engineering"));
+
+        mockMvc.perform(post("/api/v1/employees")
+                        .contentType("application/json")
+                        .content("""
+                                {"id":"101","name":"Duplicate","department":"Engineering"}
+                                """))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void shouldUpdateEmployeeAndRejectMissingOrMismatchedIds() throws Exception {
+        mockMvc.perform(put("/api/v1/employees/101")
+                        .contentType("application/json")
+                        .content("""
+                                {"id":"101","name":"Updated Employee","department":"Operations"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Updated Employee"))
+                .andExpect(jsonPath("$.department").value("Operations"));
+
+        mockMvc.perform(put("/api/v1/employees/missing")
+                        .contentType("application/json")
+                        .content("""
+                                {"id":"missing","name":"Unknown","department":"Operations"}
+                                """))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(put("/api/v1/employees/101")
+                        .contentType("application/json")
+                        .content("""
+                                {"id":"different","name":"Mismatch","department":"Operations"}
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldDeleteEmployeeAndReturnNotFoundWhenMissing() throws Exception {
+        mockMvc.perform(delete("/api/v1/employees/101"))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(delete("/api/v1/employees/missing"))
+                .andExpect(status().isNotFound());
     }
 
     @Test

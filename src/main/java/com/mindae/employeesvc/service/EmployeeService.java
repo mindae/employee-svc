@@ -6,8 +6,10 @@ import com.mindae.employeesvc.eda.event.OutboxEvent;
 import com.mindae.employeesvc.eda.repo.EmployeeRepository;
 import com.mindae.employeesvc.eda.repo.OutboxEventRepository;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
@@ -32,7 +34,7 @@ public class EmployeeService {
     }
 
     @Transactional
-    public void createEmp(
+    public void createEmpForEvent(
             String employeeId,
             String name,
             String department) {
@@ -70,6 +72,28 @@ public class EmployeeService {
     }
 
     public List<Employee> getAllEmployees() {
-        return empRepo.findAll(Sort.by(Sort.Direction.ASC, "id"));
+        return empRepo
+                .findAll(Sort.by(Sort.Direction.ASC, "id"));
+    }
+
+    public void deleteEmp(String id) {
+        if (!empRepo.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found");
+        }
+        empRepo.deleteById(id);
+    }
+
+    public Employee updateEmp(String id, Employee updatedEmployee) {
+        if (!empRepo.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found");
+        }
+        return empRepo.save(updatedEmployee);
+    }
+
+    public Employee createEmp(Employee employee) {
+        if (empRepo.existsById(employee.getId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Employee already exists");
+        }
+        return empRepo.save(employee);
     }
 }

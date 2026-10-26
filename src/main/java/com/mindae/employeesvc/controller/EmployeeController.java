@@ -7,7 +7,10 @@ import com.mindae.employeesvc.service.EmployeeEventProducer;
 import com.mindae.employeesvc.service.EmployeeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -17,14 +20,14 @@ public class EmployeeController {
 
     private static final Logger log =
             LoggerFactory.getLogger(EmployeeController.class);
-    private final DepartmentService departmentService;
-    private final EmployeeEventProducer eep;
-    private final EmployeeService es;
+    private final DepartmentService deptSvc;
+    private final EmployeeEventProducer eventProducer;
+    private final EmployeeService empSvc;
 
-    EmployeeController(DepartmentService ds, EmployeeEventProducer eep, EmployeeService es) {
-        this.departmentService = ds;
-        this.eep = eep;
-        this.es = es;
+    EmployeeController(DepartmentService deptSvc, EmployeeEventProducer eventProducer, EmployeeService empSvc) {
+        this.deptSvc = deptSvc;
+        this.eventProducer = eventProducer;
+        this.empSvc = empSvc;
     }
 
     @GetMapping
@@ -33,28 +36,50 @@ public class EmployeeController {
         return new EmployeeResponse(
                 101L,
                 "mindae",
-                departmentService.getDepartment()
+                deptSvc.getDepartment()
         );
     }
 
     @GetMapping("/all")
     public List<Employee> getAllEmployees() {
-        return es.getAllEmployees();
+        return empSvc.getAllEmployees();
     }
 
     @PostMapping("/{employeeId}/event")
     public String createEvent(@PathVariable String employeeId) {
-        eep.sendEmployeeCreatedEvent(employeeId,
+        eventProducer.sendEmployeeCreatedEvent(employeeId,
                 "Mindae",
                 "Technology");
         return "Event published";
     }
 
-    @PostMapping
+    // Event-driven create employee endpoint
+    @PostMapping("/events")
     public String createEmployee(@RequestParam String id,
                                  @RequestParam String name,
                                  @RequestParam String department) {
-        es.createEmp(id, name, department);
+        empSvc.createEmpForEvent(id, name, department);
         return "Employee created";
+    }
+
+    @PostMapping
+    public ResponseEntity<Employee> createCrudEmployee(@RequestBody Employee employee) {
+        Employee createdEmployee = empSvc.createEmp(employee);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdEmployee);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEmployee(@PathVariable String id) {
+        empSvc.deleteEmp(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Employee> updateEmployee(@PathVariable String id,
+                                                   @RequestBody Employee updatedEmployee) {
+        if (!id.equals(updatedEmployee.getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee ID must match the URL");
+        }
+        return ResponseEntity.ok(empSvc.updateEmp(id, updatedEmployee));
     }
 }
